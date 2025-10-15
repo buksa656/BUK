@@ -34,7 +34,22 @@
             overflow-x: hidden;
             background: linear-gradient(135deg, var(--primary) 0%, var(--romantic-pink) 50%, var(--soft-gold) 100%);
         }
+		.code-modal {
+		  transition: opacity 0.8s;
+		  opacity: 1;
+		}
+		.code-modal.fade-out {
+		  opacity: 0;
+		  pointer-events: none;
+		}
 
+		.main-content {
+		  transition: opacity 1s;
+		  opacity: 0;
+		}
+		.main-content.fade-in {
+		  opacity: 1;
+		}
         /* Falling Petals Animation */
         .petals {
             position: fixed;
@@ -721,6 +736,7 @@ body.validate-code #codeModal {
 	</script>
 </head>
 <body>
+
 <!-- Falling Petals -->
     <div class="petals" id="petals"></div>
 
@@ -760,7 +776,7 @@ body.validate-code #codeModal {
             </div>
         </div>
     </nav>
-
+<div class="main-content">
     <!-- Hero Section -->
     <section id="hero" class="hero">
         <div class="floating-heart">💕</div>
@@ -902,7 +918,7 @@ body.validate-code #codeModal {
             </form>
         </div>
     </section>
-
+</div>
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -1134,17 +1150,24 @@ body.validate-code #codeModal {
 		    updateCodeModalTexts(currentLanguage);
 		  }, 2000);
 		
-		  document.getElementById('validateCodeBtn').onclick = function() {
-		    const code = document.getElementById('inviteCodeInput').value.trim();
-		    if (validCodes.includes(code)) {
-		      document.getElementById('codeModal').style.display = 'none';
-		      document.body.classList.remove('validate-code');
-		      createPetals();
-		    } else {
-		      document.getElementById('codeError').style.display = 'block';
-		      updateCodeModalTexts(currentLanguage); // To ensure error shows in selected language
-		    }
-		  };
+		document.getElementById('validateCodeBtn').onclick = function() {
+		  const code = document.getElementById('inviteCodeInput').value.trim();
+		  if (validCodes.includes(code)) {
+			// Fade out modal
+			const modal = document.getElementById('codeModal');
+			modal.classList.add('fade-out');
+			// Fade in main content po krótkiej przerwie (po modal zniknie)
+			setTimeout(() => {
+			  modal.style.display = 'none';
+			  document.body.classList.remove('validate-code');
+			  document.querySelector('.main-content').classList.add('fade-in');
+			  createPetals();
+			}, 800); // czas taki jak transition w CSS
+		  } else {
+			document.getElementById('codeError').style.display = 'block';
+			updateCodeModal(currentLang);
+		  }
+		};
 		});
 
         // Create Falling Petals
@@ -1294,7 +1317,7 @@ body.validate-code #codeModal {
                         });
                     }, function(error) {
                         console.log('FAILED...', error);
-                        alert('Sorry, there was an error sending your RSVP. Please try again or contact us directly.');
+                        alert('ENG: RVSP can be sent only received official wedding invitation. PL: Potwierdzenie może zostać wysłane tylko po otrzymaniu właściwego kodu zaproszenia. ');
                     });
             }
         });
