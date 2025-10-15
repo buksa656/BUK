@@ -626,6 +626,88 @@
                 transform: translateY(-20px) rotate(10deg);
             }
         }
+		body.validate-code nav,
+		body.validate-code section,
+		body.validate-code footer,
+		body.validate-code .petals {
+		  display: none !important;
+		}
+		body.validate-code #codeModal {
+		  display: flex !important;
+		}
+		.code-modal {
+		  position: fixed;
+		  top: 0; left: 0; width: 100vw; height: 100vh;
+		  background: linear-gradient(135deg, var(--romantic-pink) 0%, var(--soft-gold) 100%);
+		  display: flex; justify-content: center; align-items: center;
+		  z-index: 9999;
+		  transition: opacity 0.5s;
+		}
+		
+		.code-modal-content {
+		  background: #fff;
+		  padding: 40px 32px;
+		  border-radius: 22px;
+		  box-shadow: 0 8px 36px var(--shadow), 0 1.5px 0 var(--accent);
+		  max-width: 350px;
+		  width: 100%;
+		  text-align: center;
+		  font-family: 'Playfair Display', serif;
+		}
+		
+		.code-modal-content h2 {
+		  font-family: 'Dancing Script', cursive;
+		  font-size: 2.2rem;
+		  color: var(--accent);
+		  text-shadow: 0 2px 12px var(--soft-gold);
+		  margin-bottom: 22px;
+		}
+		
+		.code-modal-content input {
+		  width: 85%;
+		  padding: 14px 10px;
+		  border: 2px solid var(--secondary);
+		  border-radius: 10px;
+		  font-size: 1.05rem;
+		  margin-bottom: 20px;
+		  transition: border-color 0.3s, box-shadow 0.3s;
+		  background: var(--primary);
+		  color: var(--text-dark);
+		  font-family: 'Crimson Text', serif;
+		}
+		
+		.code-modal-content input:focus {
+		  border-color: var(--accent);
+		  box-shadow: 0 0 0 2px rgba(212,175,55,0.15);
+		  outline: none;
+		}
+		
+		#validateCodeBtn {
+		  background: linear-gradient(135deg, var(--accent), #e6c965);
+		  color: #fff;
+		  padding: 12px 38px;
+		  border: none;
+		  border-radius: 24px;
+		  font-size: 1.1rem;
+		  font-weight: 600;
+		  box-shadow: 0 3px 15px rgba(212,175,55,.25);
+		  cursor: pointer;
+		  margin-bottom: 6px;
+		  transition: background 0.3s, box-shadow 0.3s;
+		}
+		
+		#validateCodeBtn:hover {
+		  background: linear-gradient(135deg, #e8c5a0, var(--accent));
+		  box-shadow: 0 6px 21px rgba(212,175,55,0.28);
+		}
+		
+		#codeError {
+		  color: #e74c3c;
+		  font-size: 1rem;
+		  margin-top: 10px;
+		  letter-spacing: 0.2px;
+		  font-family: 'Crimson Text', serif;
+		}
     </style>
 	<script type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
@@ -643,7 +725,15 @@
     <div class="loading" id="loading">
         <div class="heart"></div>
     </div>
-
+	<!-- Codes -->
+	<div class="code-modal" id="codeModal" style="display:none;">
+	  <div class="code-modal-content">
+	    <h2>Please enter your invitation code</h2>
+	    <input type="text" id="inviteCodeInput" placeholder="Invitation Code" autocomplete="off" />
+	    <button id="validateCodeBtn">Submit</button>
+	    <div id="codeError" style="color:#c00;display:none;">Invalid code. Please try again.</div>
+	  </div>
+	</div>
     <!-- Falling Petals -->
     <div class="petals" id="petals"></div>
 
@@ -1012,12 +1102,25 @@
         const EMAILJS_TEMPLATE_ID = 'template_nzzzhuy'; // Replace with your Template ID
 
         // Loading Animation
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-                createPetals();
-            }, 2000);
-        });
+		window.addEventListener('load', function() {
+		  setTimeout(() => {
+		    document.getElementById('loading').classList.add('hidden');
+		    document.getElementById('codeModal').style.display = 'flex'; // Show modal, hide rest of site with CSS if needed
+		    // Stop content from being visible:
+		    document.body.classList.add('validate-code'); // Optional: add CSS to hide sections if .validate-code is present
+		  }, 2000);
+		
+		  document.getElementById('validateCodeBtn').onclick = function() {
+		    const code = document.getElementById('inviteCodeInput').value.trim();
+		    if(validCodes.includes(code)) {
+		      document.getElementById('codeModal').style.display = 'none';
+		      document.body.classList.remove('validate-code');
+		      // Main content becomes visible
+		    } else {
+		      document.getElementById('codeError').style.display = 'block';
+		    }
+		  };
+		});
 
         // Create Falling Petals
         function createPetals() {
@@ -1182,6 +1285,11 @@
                 });
             });
         });
+
+		const validCodes = [
+		  "MARTA", // use real codes!
+		];
+		
     </script>
 </body>
 </html>
