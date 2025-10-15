@@ -699,6 +699,15 @@
 		  letter-spacing: 0.2px;
 		  font-family: 'Crimson Text', serif;
 		}
+		body.validate-code nav,
+body.validate-code section,
+body.validate-code footer,
+body.validate-code .petals {
+  display: none !important;
+}
+body.validate-code #codeModal {
+  display: flex !important;
+}
     </style>
 	<script type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
@@ -938,7 +947,12 @@
                 our_story: 'Our Love Story',
                 story_text: "Hi! We met on the very casual day like it is many in daily life. Something went different that day as we stand by each other as best friends, soulmates and now husband and wife.",
                 love_quote: '"Love is not just looking at each other, it\'s looking in the same direction together."',
-                
+            	
+				 // Modal z kodami
+				modal_title: "Please enter your invitation code",
+			    modal_placeholder: "Invitation Code",
+			    modal_submit: "Submit",
+			    modal_error: "Invalid code. Please try again.",
                 // RSVP Section
                 rsvp: 'RSVP',
                 rsvp_deadline: 'Please respond by April 1st, 2026',
@@ -983,6 +997,11 @@
                 wedding_date: '08 Sierpnia 2026',
                 youre_invited: 'Serdecznie zapraszamy Ciebie na świętowanie naszego wyjątkowego dnia',
                 
+				//Modal z kodami
+				modal_title: "Wprowadź kod zaproszenia",
+			    modal_placeholder: "Kod zaproszenia",
+			    modal_submit: "Wyślij",
+			    modal_error: "Niepoprawny kod. Spróbuj ponownie.",
                 // Details Section
                 wedding_details: 'Szczegóły Ślubu',
                 details_subtitle: 'Wszystkie ważne informacje o naszym wyjątkowym dniu',
@@ -1041,11 +1060,16 @@
         
         // Current language (default to English)
         let currentLanguage = 'en';
-        
+        function updateCodeModalTexts(lang) {
+		  document.querySelector('#codeModal h2').innerText = translations[lang].modaltitle;
+		  document.getElementById('inviteCodeInput').placeholder = translations[lang].modalplaceholder;
+		  document.getElementById('validateCodeBtn').innerText = translations[lang].modalsubmit;
+		  document.getElementById('codeError').innerText = translations[lang].modalerror;
+		}
         // Language switching function
         function switchLanguage(lang) {
             currentLanguage = lang;
-            
+            localStorage.setItem('lang', lang);
             // Update active language button
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.classList.remove('active');
@@ -1081,6 +1105,8 @@
                     element.style.opacity = '1';
                 });
             }, 150);
+			updateCodeModalTexts(lang);
+
         }
         
         // Initialize language on page load
@@ -1097,19 +1123,20 @@
 		window.addEventListener('load', function() {
 		  setTimeout(() => {
 		    document.getElementById('loading').classList.add('hidden');
-		    document.getElementById('codeModal').style.display = 'flex'; // Show modal, hide rest of site with CSS if needed
-		    // Stop content from being visible:
-		    document.body.classList.add('validate-code'); // Optional: add CSS to hide sections if .validate-code is present
+		    document.getElementById('codeModal').style.display = 'flex';
+		    document.body.classList.add('validate-code');
+		    updateCodeModalTexts(currentLanguage);
 		  }, 2000);
 		
 		  document.getElementById('validateCodeBtn').onclick = function() {
 		    const code = document.getElementById('inviteCodeInput').value.trim();
-		    if(validCodes.includes(code)) {
+		    if (validCodes.includes(code)) {
 		      document.getElementById('codeModal').style.display = 'none';
 		      document.body.classList.remove('validate-code');
-		      // Main content becomes visible
+		      createPetals();
 		    } else {
 		      document.getElementById('codeError').style.display = 'block';
+		      updateCodeModalTexts(currentLanguage); // To ensure error shows in selected language
 		    }
 		  };
 		});
