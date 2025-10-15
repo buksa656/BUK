@@ -730,7 +730,13 @@ body.validate-code #codeModal {
     </div>
 	<!-- Codes -->
 	<div class="code-modal" id="codeModal" style="display:none;">
+
 	  <div class="code-modal-content">
+	  	   <div class="language-toggle" style="display: flex; justify-content:center;">
+                <button id="langEn" class="lang-btn active" onclick="switchLanguage('en')">EN</button>
+                <span class="lang-separator">|</span>
+                <button id="langPl" class="lang-btn" onclick="switchLanguage('pl')">PL</button>
+            </div>
 	    <h2>Please enter your invitation code</h2>
 	    <input type="text" id="inviteCodeInput" placeholder="Invitation Code" autocomplete="off" />
 	    <button id="validateCodeBtn">Submit</button>
