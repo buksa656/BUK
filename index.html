@@ -2273,24 +2273,20 @@ if (typeof translations !== 'undefined') {
   translations.pl.bingo_gallery_subtitle = "Dodaj zdjęcia swoich momentów Bingo!";
   translations.pl.bingo_upload_photo = "📸 Dodaj Zdjęcie";
 }
-
-// Initialize when page loads (after code validation)
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initBingo);
-} else {
-  initBingo();
-}
-
 		const validCodes = [
 		  "MARTA", // use real codes!
 		];
 		// =================== INICJALIZACJA CLOUDINARY ===================
 document.addEventListener('DOMContentLoaded', function() {
+  initBingo();
+  
   if (typeof cloudinary !== 'undefined') {
+    setTimeout(() => {
+      initLocalPhotoSystem();
+    }, 200);
+  } else {
+    console.error('Cloudinary widget not loaded');
   }
-  setTimeout(() => {
-    initLocalPhotoSystem();
-  }, 100); // Małe opóźnienie aby HTML się załadował
 });
     </script>
 </body>
