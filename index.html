@@ -1931,20 +1931,6 @@ function addPhotoToGallery(imageUrl, publicId) {
   photoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-// =================== ZAŁADUJ ISTNIEJĄCE ZDJĘCIA ===================
-async function loadExistingPhotos() {
-  try {
-    const response = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CONFIG.cloudName}/image/list/wedding_bingo.json`);
-    const data = await response.json();
-    
-    data.resources?.forEach(photo => {
-      const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_CONFIG.cloudName}/image/upload/c_fill,w_300,h_300/${photo.public_id}.jpg`;
-      addPhotoToGallery(imageUrl, photo.public_id);
-    });
-  } catch (error) {
-    console.log('📷 No existing photos found or error loading:', error);
-  }
-}
 // Initialize Bingo
 function initBingo() {
   const lang = currentLanguage || 'en';
@@ -2026,7 +2012,6 @@ if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof cloudinary !== 'undefined') {
     initPhotoUpload();
-    loadExistingPhotos();
   } else {
     console.error('Cloudinary widget not loaded');
   }
