@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marta &amp; Jakub - Wedding Invitation</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+	<script src="https://widget.cloudinary.com/v2.0/global/all.js"></script>
 	<style>
         :root {
             --primary: #f8f4f0;
@@ -1178,10 +1179,9 @@ body.validate-code #codeModal {
 		<div class="bingo-gallery">
 		  <h3 data-translate="bingo_gallery_title">Photo Gallery</h3>
 		  <p class="bingo-gallery-subtitle" data-translate="bingo_gallery_subtitle">Upload photos of your Bingo moments!</p>
-		  <div id="uploadSection">
-			<input type="file" id="photoUpload" accept="image/*" capture="environment" style="display:none;">
-			<label for="photoUpload" class="btn-upload" data-translate="bingo_upload_photo">📸 Upload Photo</label>
-		  </div>
+			<div id="uploadSection">
+			  <button id="photoUpload" class="btn-upload" data-translate="bingo_upload_photo">📸 Upload Photo</button>
+			</div>
 		  <div id="photoGallery" class="photo-gallery-grid"></div>
 		</div>
 	  </div>
@@ -1861,61 +1861,90 @@ function createConfetti() {
     }, i * 30);
   }
 }
-function handlePhotoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  
-  // Konwertuj na base64
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const photoData = e.target.result;
-    
-    // Dodaj do galerii
-    const gallery = document.getElementById('photoGallery');
-    const photoDiv = document.createElement('div');
-    photoDiv.className = 'gallery-photo';
-    photoDiv.innerHTML = `<img src="${photoData}" alt="Wedding moment">`;
-    gallery.appendChild(photoDiv);
-    
-    // Zapisz do localStorage
-    let photos = JSON.parse(localStorage.getItem('weddingBingoPhotos') || '[]');
-    photos.push({
-      data: photoData,
-      timestamp: new Date().toISOString()
-    });
-    localStorage.setItem('weddingBingoPhotos', JSON.stringify(photos));
-  };
-  reader.readAsDataURL(file);
+// =================== CLOUDINARY KONFIGURACJA ===================
+const CLOUDINARY_CONFIG = {
+  cloudName: 'dyz8kvmfn', // Wklej swój cloud name tutaj
+  uploadPreset: 'wedding_photos' // Nazwa preset z kroku 3
+};
+
+// =================== NOWA FUNKCJA PHOTO UPLOAD ===================
+function initPhotoUpload() {
+  const uploadWidget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CONFIG.cloudName,
+    uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
+    folder: 'wedding_bingo',
+    sources: ['local', 'camera'],
+    multiple: false,
+    cropping: true,
+    croppingAspectRatio: 1,
+    resourceType: 'image',
+    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif'],
+    maxFileSize: 10000000, // 10MB
+    theme: 'minimal',
+    styles: {
+      palette: {
+        window: "#FFFFFF",
+        sourceBg: "#F8F4F0",
+        windowBorder: "#D4AF37",
+        tabIcon: "#D4AF37",
+        inactiveTabIcon: "#A0A0A0",
+        menuIcons: "#D4AF37",
+        link: "#D4AF37",
+        action: "#D4AF37",
+        inProgress: "#E8C5A0",
+        complete: "#55A855",
+        error: "#CC5555",
+        textDark: "#5A5A5A",
+        textLight: "#FFFFFF"
+      }
+    }
+  }, (error, result) => {
+    if (!error && result && result.event === "success") {
+      console.log('✅ Upload successful:', result.info.secure_url);
+      addPhotoToGallery(result.info.secure_url, result.info.public_id);
+    }
+    if (error) {
+      console.error('❌ Upload failed:', error);
+    }
+  });
+
+  // Podłącz do przycisku upload
+  document.getElementById('photoUpload').addEventListener('click', () => {
+    uploadWidget.open();
+  });
 }
-function addPhotoToGallery(imageUrl) {
+
+// =================== DODAWANIE ZDJĘĆ DO GALERII ===================
+function addPhotoToGallery(imageUrl, publicId) {
   const gallery = document.getElementById('photoGallery');
   const photoDiv = document.createElement('div');
   photoDiv.className = 'gallery-photo';
-  photoDiv.innerHTML = `<img src="${imageUrl}" alt="Wedding moment">`;
+  photoDiv.innerHTML = `
+    <img src="${imageUrl}" alt="Wedding moment" loading="lazy">
+    <div class="photo-overlay">
+      <span class="photo-time">${new Date().toLocaleTimeString()}</span>
+    </div>
+  `;
   gallery.appendChild(photoDiv);
-}
-function savePhoto(photoData) {
-  let photos = JSON.parse(localStorage.getItem('weddingBingoPhotos') || '[]');
-  photos.push({
-    data: photoData,
-    timestamp: new Date().toISOString()
-  });
-  localStorage.setItem('weddingBingoPhotos', JSON.stringify(photos));
+  
+  // Smooth scroll do nowego zdjęcia
+  photoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function displayPhotos() {
-  const gallery = document.getElementById('photoGallery');
-  const photos = JSON.parse(localStorage.getItem('weddingBingoPhotos') || '[]');
-
-  gallery.innerHTML = '';
-  photos.forEach((photo, index) => {
-    const photoDiv = document.createElement('div');
-    photoDiv.className = 'gallery-photo';
-    photoDiv.innerHTML = `<img src="${photo.data}" alt="Wedding moment ${index + 1}">`;
-    gallery.appendChild(photoDiv);
-  });
+// =================== ZAŁADUJ ISTNIEJĄCE ZDJĘCIA ===================
+async function loadExistingPhotos() {
+  try {
+    const response = await fetch(`https://res.cloudinary.com/${CLOUDINARY_CONFIG.cloudName}/image/list/wedding_bingo.json`);
+    const data = await response.json();
+    
+    data.resources?.forEach(photo => {
+      const imageUrl = `https://res.cloudinary.com/${CLOUDINARY_CONFIG.cloudName}/image/upload/c_fill,w_300,h_300/${photo.public_id}.jpg`;
+      addPhotoToGallery(imageUrl, photo.public_id);
+    });
+  } catch (error) {
+    console.log('📷 No existing photos found or error loading:', error);
+  }
 }
-
 // Initialize Bingo
 function initBingo() {
   const lang = currentLanguage || 'en';
@@ -1993,7 +2022,15 @@ if (document.readyState === 'loading') {
 		const validCodes = [
 		  "MARTA", // use real codes!
 		];
-		
+		// =================== INICJALIZACJA CLOUDINARY ===================
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof cloudinary !== 'undefined') {
+    initPhotoUpload();
+    loadExistingPhotos();
+  } else {
+    console.error('Cloudinary widget not loaded');
+  }
+});
     </script>
 </body>
 </html>
