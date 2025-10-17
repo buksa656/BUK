@@ -1127,6 +1127,101 @@ body.validate-code #codeModal {
 .local-photo-remove:hover {
   background: #f44336;
 }
+		/* Mobile responsiveness - DODAJ TO DO ISTNIEJĄCEJ SEKCJI @media */
+@media (max-width: 768px) {
+  .bingo-section {
+    padding: 60px 10px; /* Mniejszy padding */
+  }
+  
+  .bingo-card-container {
+    margin: 20px 0; /* Mniejsze marginesy */
+    padding: 0 10px; /* Dodatkowy padding po bokach */
+  }
+  
+  .bingo-card {
+    gap: 4px; /* Mniejsze przestrzenie między kartami */
+    padding: 10px; /* Mniejszy padding karty */
+    max-width: 100%; /* Zajmij całą szerokość */
+    width: calc(100vw - 40px); /* Szerokość minus marginesy */
+    box-sizing: border-box;
+  }
+  
+  .bingo-cell {
+    font-size: 0.6rem; /* Mniejsza czcionka */
+    padding: 3px; /* Mniejszy padding */
+    min-height: 60px; /* Minimalna wysokość */
+    line-height: 1.1; /* Mniejsza wysokość linii */
+  }
+  
+  .bingo-cell.marked::after {
+    font-size: 1.2rem; /* Mniejszy checkmark */
+  }
+  
+  /* Przyciski kontrolne */
+  .bingo-controls {
+    flex-direction: column; /* Przyciski jeden pod drugim */
+    gap: 10px;
+    margin: 20px 10px;
+  }
+  
+  .btn-secondary, .btn-primary {
+    width: 100%; /* Pełna szerokość */
+    padding: 15px;
+    font-size: 1rem;
+  }
+  
+  /* Upload controls */
+  .upload-controls {
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 10px;
+  }
+  
+  .btn-add-photo, .btn-upload-cloud, .btn-clear {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 1rem;
+  }
+  
+  /* Galerie zdjęć */
+  .local-photo-gallery, .photo-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Mniejsze zdjęcia */
+    gap: 8px;
+    padding: 10px;
+  }
+  
+  .local-photo img, .gallery-photo img {
+    height: 80px; /* Mniejsze zdjęcia */
+  }
+}
+
+/* Extra small screens (telefony w pionie) */
+@media (max-width: 480px) {
+  .bingo-section h2 {
+    font-size: 2rem; /* Mniejszy tytuł */
+  }
+  
+  .bingo-card {
+    gap: 2px; /* Jeszcze mniejsze przestrzenie */
+    padding: 8px;
+    width: calc(100vw - 20px); /* Jeszcze mniej marginesów */
+  }
+  
+  .bingo-cell {
+    font-size: 0.55rem; /* Jeszcze mniejsza czcionka */
+    padding: 2px;
+    min-height: 50px;
+  }
+  
+  .bingo-instructions {
+    padding: 20px 15px; /* Mniejszy padding */
+    margin: 0 10px 20px;
+  }
+  
+  .local-photo-gallery, .photo-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Jeszcze mniejsze */
+  }
+}
     </style>
 	<script type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
