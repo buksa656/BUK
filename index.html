@@ -2081,10 +2081,20 @@ function clearLocalPhotos() {
 
 function updateUploadButton() {
   const uploadBtn = document.getElementById('uploadToCloudinary');
-  const countSpan = document.getElementById('photoCount');
   
-  countSpan.textContent = localPhotos.length;
-  uploadBtn.disabled = localPhotos.length === 0;
+  if (uploadBtn) {
+    // Znajdź span wewnątrz przycisku lub stwórz go
+    let countSpan = uploadBtn.querySelector('#photoCount');
+    if (!countSpan) {
+      // Jeśli span nie istnieje, aktualizuj całą zawartość przycisku
+      const translatedText = translations[currentLanguage]?.bingo_upload_cloud || '☁️ Wyślij do Chmury';
+      uploadBtn.innerHTML = `${translatedText} (${localPhotos.length})`;
+    } else {
+      countSpan.textContent = localPhotos.length;
+    }
+    
+    uploadBtn.disabled = localPhotos.length === 0;
+  }
 }
 
 function saveLocalPhotos() {
@@ -2277,10 +2287,10 @@ if (document.readyState === 'loading') {
 		// =================== INICJALIZACJA CLOUDINARY ===================
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof cloudinary !== 'undefined') {
-    initLocalPhotoSystem();
-  } else {
-    console.error('Cloudinary widget not loaded');
   }
+  setTimeout(() => {
+    initLocalPhotoSystem();
+  }, 100); // Małe opóźnienie aby HTML się załadował
 });
     </script>
 </body>
