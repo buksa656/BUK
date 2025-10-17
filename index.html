@@ -1015,7 +1015,118 @@ body.validate-code #codeModal {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
 }
+.upload-controls {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
 
+.btn-add-photo, .btn-upload-cloud, .btn-clear {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-add-photo {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  color: white;
+  box-shadow: 0 4px 15px rgba(76,175,80,0.3);
+}
+
+.btn-upload-cloud {
+  background: linear-gradient(135deg, var(--accent), #e6c965);
+  color: white;
+  box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+}
+
+.btn-upload-cloud:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-clear {
+  background: linear-gradient(135deg, #f44336, #ef5350);
+  color: white;
+  box-shadow: 0 4px 15px rgba(244,67,54,0.3);
+}
+
+.btn-add-photo:hover, .btn-upload-cloud:hover:not(:disabled), .btn-clear:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+.local-gallery-section, .cloud-gallery-section {
+  margin: 30px 0;
+}
+
+.local-gallery-section h4, .cloud-gallery-section h4 {
+  color: var(--accent);
+  margin-bottom: 15px;
+  font-family: 'Playfair Display', serif;
+}
+
+.local-photo-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+  min-height: 50px;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.local-photo-gallery.empty::after {
+  content: "Dodaj zdjęcia aby je zobaczyć tutaj...";
+  color: #999;
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 20px;
+}
+
+.local-photo {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.local-photo img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+.local-photo-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(244,67,54,0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.local-photo-remove:hover {
+  background: #f44336;
+}
     </style>
 	<script type="text/javascript"
         src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
@@ -1176,14 +1287,30 @@ body.validate-code #codeModal {
 		  </div>
 		</div>
 
-		<div class="bingo-gallery">
-		  <h3 data-translate="bingo_gallery_title">Photo Gallery</h3>
-		  <p class="bingo-gallery-subtitle" data-translate="bingo_gallery_subtitle">Upload photos of your Bingo moments!</p>
-			<div id="uploadSection">
-			  <button id="photoUpload" class="btn-upload" data-translate="bingo_upload_photo">📸 Upload Photo</button>
-			</div>
-		  <div id="photoGallery" class="photo-gallery-grid"></div>
-		</div>
+<div class="bingo-gallery">
+  <h3 data-translate="bingo_gallery_title">Photo Gallery</h3>
+  <p class="bingo-gallery-subtitle" data-translate="bingo_gallery_subtitle">Add photos and upload them to share with everyone!</p>
+  
+  <!-- NOWE PRZYCISKI -->
+  <div id="uploadSection" class="upload-controls">
+    <input type="file" id="localPhotoInput" accept="image/*" multiple style="display:none;">
+    <label for="localPhotoInput" class="btn-add-photo" data-translate="bingo_add_photo">📸 Dodaj Zdjęcie</label>
+    <button id="uploadToCloudinary" class="btn-upload-cloud" data-translate="bingo_upload_cloud" disabled>☁️ Wyślij do Chmury (<span id="photoCount">0</span>)</button>
+    <button id="clearLocalPhotos" class="btn-clear" data-translate="bingo_clear_all">🗑️ Wyczyść Wszystkie</button>
+  </div>
+  
+  <!-- GALERIA ROBOCZA (localStorage) -->
+  <div class="local-gallery-section">
+    <h4 data-translate="bingo_your_photos">Twoje Zdjęcia (do wysłania):</h4>
+    <div id="localPhotoGallery" class="local-photo-gallery"></div>
+  </div>
+  
+  <!-- GALERIA PUBLICZNA (Cloudinary) -->
+  <div class="cloud-gallery-section">
+    <h4 data-translate="bingo_shared_photos">Udostępnione Zdjęcia:</h4>
+    <div id="cloudPhotoGallery" class="photo-gallery-grid"></div>
+  </div>
+</div>
 	  </div>
 	</section>
     <!-- RSVP Section -->
@@ -1867,56 +1994,182 @@ const CLOUDINARY_CONFIG = {
   uploadPreset: 'wedding_photos' // Nazwa preset z kroku 3
 };
 
-// =================== NOWA FUNKCJA PHOTO UPLOAD ===================
-function initPhotoUpload() {
-  const uploadWidget = cloudinary.createUploadWidget({
-    cloudName: CLOUDINARY_CONFIG.cloudName,
-    uploadPreset: CLOUDINARY_CONFIG.uploadPreset,
-    folder: 'wedding_bingo',
-    sources: ['local', 'camera'],
-    multiple: false,
-    cropping: true,
-    croppingAspectRatio: 1,
-    resourceType: 'image',
-    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif'],
-    maxFileSize: 10000000, // 10MB
-    theme: 'minimal',
-    styles: {
-      palette: {
-        window: "#FFFFFF",
-        sourceBg: "#F8F4F0",
-        windowBorder: "#D4AF37",
-        tabIcon: "#D4AF37",
-        inactiveTabIcon: "#A0A0A0",
-        menuIcons: "#D4AF37",
-        link: "#D4AF37",
-        action: "#D4AF37",
-        inProgress: "#E8C5A0",
-        complete: "#55A855",
-        error: "#CC5555",
-        textDark: "#5A5A5A",
-        textLight: "#FFFFFF"
-      }
-    }
-  }, (error, result) => {
-    if (!error && result && result.event === "success") {
-      console.log('✅ Upload successful:', result.info.secure_url);
-      addPhotoToGallery(result.info.secure_url, result.info.public_id);
-    }
-    if (error) {
-      console.error('❌ Upload failed:', error);
-    }
-  });
+// =================== ZARZĄDZANIE LOKALNYMI ZDJĘCIAMI ===================
+let localPhotos = [];
 
-  // Podłącz do przycisku upload
-  document.getElementById('photoUpload').addEventListener('click', () => {
-    uploadWidget.open();
-  });
+function initLocalPhotoSystem() {
+  const fileInput = document.getElementById('localPhotoInput');
+  const uploadBtn = document.getElementById('uploadToCloudinary');
+  const clearBtn = document.getElementById('clearLocalPhotos');
+  
+  // Dodawanie zdjęć lokalnie
+  fileInput.addEventListener('change', handleLocalPhotoAdd);
+  
+  // Upload do Cloudinary
+  uploadBtn.addEventListener('click', uploadAllToCloudinary);
+  
+  // Czyszczenie lokalnych zdjęć
+  clearBtn.addEventListener('click', clearLocalPhotos);
+  
+  // Załaduj zapisane zdjęcia z localStorage
+  loadLocalPhotos();
 }
 
-// =================== DODAWANIE ZDJĘĆ DO GALERII ===================
-function addPhotoToGallery(imageUrl, publicId) {
-  const gallery = document.getElementById('photoGallery');
+function handleLocalPhotoAdd(event) {
+  const files = Array.from(event.target.files);
+  
+  files.forEach(file => {
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const photoData = {
+          id: Date.now() + Math.random(), // Unique ID
+          data: e.target.result,
+          name: file.name,
+          size: file.size,
+          timestamp: new Date().toISOString()
+        };
+        
+        localPhotos.push(photoData);
+        saveLocalPhotos();
+        renderLocalGallery();
+        updateUploadButton();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  // Reset input
+  event.target.value = '';
+}
+
+function renderLocalGallery() {
+  const gallery = document.getElementById('localPhotoGallery');
+  
+  if (localPhotos.length === 0) {
+    gallery.innerHTML = '';
+    gallery.classList.add('empty');
+    return;
+  }
+  
+  gallery.classList.remove('empty');
+  gallery.innerHTML = localPhotos.map(photo => `
+    <div class="local-photo" data-id="${photo.id}">
+      <img src="${photo.data}" alt="${photo.name}">
+      <button class="local-photo-remove" onclick="removeLocalPhoto('${photo.id}')" title="Usuń zdjęcie">×</button>
+    </div>
+  `).join('');
+}
+
+function removeLocalPhoto(photoId) {
+  localPhotos = localPhotos.filter(photo => photo.id != photoId);
+  saveLocalPhotos();
+  renderLocalGallery();
+  updateUploadButton();
+}
+
+function clearLocalPhotos() {
+  if (localPhotos.length === 0) return;
+  
+  if (confirm('Czy na pewno chcesz usunąć wszystkie zdjęcia?')) {
+    localPhotos = [];
+    saveLocalPhotos();
+    renderLocalGallery();
+    updateUploadButton();
+  }
+}
+
+function updateUploadButton() {
+  const uploadBtn = document.getElementById('uploadToCloudinary');
+  const countSpan = document.getElementById('photoCount');
+  
+  countSpan.textContent = localPhotos.length;
+  uploadBtn.disabled = localPhotos.length === 0;
+}
+
+function saveLocalPhotos() {
+  localStorage.setItem('weddingLocalPhotos', JSON.stringify(localPhotos));
+}
+
+function loadLocalPhotos() {
+  const saved = localStorage.getItem('weddingLocalPhotos');
+  if (saved) {
+    localPhotos = JSON.parse(saved);
+    renderLocalGallery();
+    updateUploadButton();
+  }
+}
+
+// =================== UPLOAD DO CLOUDINARY (BULK) ===================
+async function uploadAllToCloudinary() {
+  if (localPhotos.length === 0) return;
+  
+  const uploadBtn = document.getElementById('uploadToCloudinary');
+  const originalText = uploadBtn.innerHTML;
+  
+  uploadBtn.disabled = true;
+  uploadBtn.innerHTML = '⏳ Wysyłanie...';
+  
+  let successCount = 0;
+  let errorCount = 0;
+  
+  for (let i = 0; i < localPhotos.length; i++) {
+    const photo = localPhotos[i];
+    
+    try {
+      // Convert base64 to blob
+      const response = await fetch(photo.data);
+      const blob = await response.blob();
+      
+      // Upload to Cloudinary
+      const formData = new FormData();
+      formData.append('file', blob);
+      formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+      formData.append('folder', 'wedding_bingo');
+      
+      const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await uploadResponse.json();
+      
+      if (result.secure_url) {
+        addPhotoToCloudGallery(result.secure_url, result.public_id);
+        successCount++;
+      } else {
+        throw new Error('Upload failed');
+      }
+      
+      // Update progress
+      uploadBtn.innerHTML = `⏳ Wysyłanie... (${i + 1}/${localPhotos.length})`;
+      
+    } catch (error) {
+      console.error('Upload error:', error);
+      errorCount++;
+    }
+  }
+  
+  // Show results
+  if (successCount > 0) {
+    // Clear local photos after successful upload
+    localPhotos = [];
+    saveLocalPhotos();
+    renderLocalGallery();
+    updateUploadButton();
+    
+    alert(`✅ Wysłano ${successCount} zdjęć!${errorCount > 0 ? ` (${errorCount} błędów)` : ''}`);
+  } else {
+    alert('❌ Wystąpił błąd podczas wysyłania zdjęć.');
+  }
+  
+  uploadBtn.disabled = false;
+  uploadBtn.innerHTML = originalText;
+}
+
+// =================== GALERIA CLOUDINARY ===================
+function addPhotoToCloudGallery(imageUrl, publicId) {
+  const gallery = document.getElementById('cloudPhotoGallery');
   const photoDiv = document.createElement('div');
   photoDiv.className = 'gallery-photo';
   photoDiv.innerHTML = `
@@ -1931,13 +2184,28 @@ function addPhotoToGallery(imageUrl, publicId) {
   photoDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
+// =================== TŁUMACZENIA ===================
+// Dodaj do istniejącego obiektu translations:
+if (typeof translations !== 'undefined') {
+  translations.en.bingo_add_photo = "📸 Add Photo";
+  translations.en.bingo_upload_cloud = "☁️ Upload to Cloud";
+  translations.en.bingo_clear_all = "🗑️ Clear All";
+  translations.en.bingo_your_photos = "Your Photos (to upload):";
+  translations.en.bingo_shared_photos = "Shared Photos:";
+  
+  translations.pl.bingo_add_photo = "📸 Dodaj Zdjęcie";
+  translations.pl.bingo_upload_cloud = "☁️ Wyślij do Chmury";
+  translations.pl.bingo_clear_all = "🗑️ Wyczyść Wszystkie";
+  translations.pl.bingo_your_photos = "Twoje Zdjęcia (do wysłania):";
+  translations.pl.bingo_shared_photos = "Udostępnione Zdjęcia:";
+}
+
 // Initialize Bingo
 function initBingo() {
   const lang = currentLanguage || 'en';
   bingoCard = generateBingoCard(lang);
   markedCells = new Set([12]); // Free space
   renderBingoCard();
-  displayPhotos();
 
   // Event listeners
   document.getElementById('resetBingo').addEventListener('click', () => {
@@ -2011,7 +2279,7 @@ if (document.readyState === 'loading') {
 		// =================== INICJALIZACJA CLOUDINARY ===================
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof cloudinary !== 'undefined') {
-    initPhotoUpload();
+    initLocalPhotoUpload();
   } else {
     console.error('Cloudinary widget not loaded');
   }
