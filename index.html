@@ -2222,8 +2222,6 @@ function initBingo() {
   document.getElementById('closeBingoWin').addEventListener('click', () => {
     document.getElementById('bingoWinModal').style.display = 'none';
   });
-
-  document.getElementById('photoUpload').addEventListener('change', handlePhotoUpload);
 }
 function refreshBingo(lang) {
   const currentMarked = new Set(markedCells); // Zachowaj zaznaczenia
@@ -2279,7 +2277,7 @@ if (document.readyState === 'loading') {
 		// =================== INICJALIZACJA CLOUDINARY ===================
 document.addEventListener('DOMContentLoaded', function() {
   if (typeof cloudinary !== 'undefined') {
-    initLocalPhotoUpload();
+    initLocalPhotoSystem();
   } else {
     console.error('Cloudinary widget not loaded');
   }
