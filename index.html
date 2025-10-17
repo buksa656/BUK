@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marta &amp; Jakub - Wedding Invitation</title>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 	<style>
         :root {
             --primary: #f8f4f0;
@@ -1862,28 +1861,31 @@ function createConfetti() {
     }, i * 30);
   }
 }
-
-// Photo upload functionality (stores in browser localStorage as base64)
 function handlePhotoUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   
-  // Twoje Cloudinary credentials (za darmo na cloudinary.com)
-  const widget = cloudinary.createUploadWidget({
-    cloudName: 'dyz8kvmfn', // ustaw swój
-    uploadPreset: 'wedding_photos', // stwórz w panelu
-    folder: 'wedding_bingo',
-    sources: ['local'],
-    resourceType: 'image'
-  }, (error, result) => {
-    if (!error && result && result.event === "success") {
-      console.log('Upload successful:', result.info);
-      addPhotoToGallery(result.info.secure_url);
-      sendEmailNotification(result.info.secure_url); // Opcjonalnie
-    }
-  });
-  
-  widget.open();
+  // Konwertuj na base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const photoData = e.target.result;
+    
+    // Dodaj do galerii
+    const gallery = document.getElementById('photoGallery');
+    const photoDiv = document.createElement('div');
+    photoDiv.className = 'gallery-photo';
+    photoDiv.innerHTML = `<img src="${photoData}" alt="Wedding moment">`;
+    gallery.appendChild(photoDiv);
+    
+    // Zapisz do localStorage
+    let photos = JSON.parse(localStorage.getItem('weddingBingoPhotos') || '[]');
+    photos.push({
+      data: photoData,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('weddingBingoPhotos', JSON.stringify(photos));
+  };
+  reader.readAsDataURL(file);
 }
 function addPhotoToGallery(imageUrl) {
   const gallery = document.getElementById('photoGallery');
