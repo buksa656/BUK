@@ -2112,31 +2112,43 @@ function initLocalPhotoSystem() {
 
 function handleLocalPhotoAdd(event) {
   const files = Array.from(event.target.files);
-  
+  let filesToLoad = files.length;
+  if (filesToLoad === 0) return;
+
   files.forEach(file => {
     if (file.type.startsWith('image/')) {
       const reader = new FileReader();
       reader.onload = function(e) {
         const photoData = {
-          id: Date.now() + Math.random(), // Unique ID
+          id: Date.now() + Math.random(),
           data: e.target.result,
           name: file.name,
           size: file.size,
           timestamp: new Date().toISOString()
         };
-        
         localPhotos.push(photoData);
-        saveLocalPhotos();
-        renderLocalGallery();
-        updateUploadButton();
+
+        // Decrement loader, render only after all loaded
+        filesToLoad--;
+        if (filesToLoad === 0) {
+          saveLocalPhotos();
+          renderLocalGallery();
+          updateUploadButton();
+        }
       };
       reader.readAsDataURL(file);
+    } else {
+      filesToLoad--;
     }
   });
-  
-  // Reset input
+
+  // iOS fix: usuń i dodaj <input>
   event.target.value = '';
+  let copy = event.target.cloneNode();
+  event.target.parentNode.replaceChild(copy, event.target);
+  copy.addEventListener('change', handleLocalPhotoAdd);
 }
+
 
 function renderLocalGallery() {
   const gallery = document.getElementById('localPhotoGallery');
