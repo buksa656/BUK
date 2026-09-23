@@ -1,0 +1,7 @@
+[
+  {
+    "id": "action-assigned",
+    "name": "Action Assigned",
+    "file": "templates/action-assigned.html"
+  }
+]

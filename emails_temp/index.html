@@ -1,1 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FlowForma Email Template Editor V2</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <h1>FlowForma Email Template Editor</h1>
+    <span>V2 · self-hosted on DOM</span>
+  </div>
+  <div class="top-actions">
+    <span id="saveState">Ready</span>
+    <button id="saveBtn" class="primary">Save to NAS</button>
+    <button id="copyBtn">Copy HTML</button>
+    <button id="downloadBtn">Download</button>
+  </div>
+</header>
 
+<div class="layout">
+  <aside class="sidebar">
+    <label class="field-label">Template</label>
+    <select id="templateSelect"></select>
+
+    <div class="side-section">
+      <div class="side-title">Insert FlowForma token</div>
+      <button class="token-btn" data-token="formlink">+ FormLink</button>
+      <button class="token-btn" data-token="change-control">+ Change Control</button>
+      <button class="token-btn" data-token="change-title">+ Change Title</button>
+      <button class="token-btn" data-token="requester">+ Requester</button>
+      <button class="token-btn" data-token="step-title">+ Step Title</button>
+      <button class="token-btn" data-token="step-assigned">+ Step Assigned To</button>
+    </div>
+
+    <div class="side-section">
+      <div class="side-title">Editing</div>
+      <button id="undoBtn">↶ Undo</button>
+      <button id="redoBtn">↷ Redo</button>
+    </div>
+
+    <div class="side-section help">
+      <strong>Protected tokens</strong>
+      <p>FlowForma tokens cannot be edited internally. You can move or remove them, but their token markup stays intact.</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="toolbar" id="toolbar">
+      <button data-cmd="bold"><b>B</b></button>
+      <button data-cmd="italic"><i>I</i></button>
+      <button data-cmd="underline"><u>U</u></button>
+      <span class="divider"></span>
+      <label>Size <select id="fontSize">
+        <option value="">—</option><option value="2">12</option><option value="3">16</option>
+        <option value="4">18</option><option value="5">22</option><option value="6">28</option>
+      </select></label>
+      <label>Align <select id="align">
+        <option value="">—</option><option value="justifyLeft">Left</option>
+        <option value="justifyCenter">Center</option><option value="justifyRight">Right</option>
+      </select></label>
+      <label>Text <input id="textColor" type="color" value="#444444"></label>
+      <button id="linkBtn">Link</button>
+      <span class="selection-info" id="selectionInfo">Nothing selected</span>
+    </div>
+
+    <div class="canvas-wrap">
+      <div class="device-tabs">
+        <button class="device active" data-width="700">Desktop</button>
+        <button class="device" data-width="390">Mobile</button>
+      </div>
+      <div id="canvas" class="canvas"></div>
+    </div>
+  </main>
+
+  <aside class="source-panel">
+    <div class="source-head">
+      <strong>HTML source</strong>
+      <span>Live</span>
+    </div>
+    <textarea id="source" spellcheck="false"></textarea>
+  </aside>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
