@@ -1,7 +1,107 @@
 [
   {
+    "id": "action-owner-notification",
+    "name": "Action Owner notification",
+    "file": "templates/Action Owner notification.html"
+  },
+  {
+    "id": "action-plan-review-notification",
+    "name": "Action Plan Review notification",
+    "file": "templates/Action Plan Review notification.html"
+  },
+  {
     "id": "action-assigned",
-    "name": "Action Assigned",
+    "name": "action-assigned",
     "file": "templates/action-assigned.html"
+  },
+  {
+    "id": "cc-reviewer-product-testing",
+    "name": "CC Reviewer - Product Testing",
+    "file": "templates/CC Reviewer - Product Testing.html"
+  },
+  {
+    "id": "cc-reviewer-project-planning",
+    "name": "CC Reviewer - Project Planning",
+    "file": "templates/CC Reviewer - Project Planning.html"
+  },
+  {
+    "id": "ccr-reached-qa-summary",
+    "name": "CCR reached QA Summary",
+    "file": "templates/CCR reached QA Summary.html"
+  },
+  {
+    "id": "change-control-impact-review-required-clinical",
+    "name": "Change Control - Impact Review Required Clinical",
+    "file": "templates/Change Control - Impact Review Required Clinical.html"
+  },
+  {
+    "id": "change-control-impact-review-required-cmc",
+    "name": "Change Control - Impact Review Required CMC",
+    "file": "templates/Change Control - Impact Review Required CMC.html"
+  },
+  {
+    "id": "change-control-impact-review-required-gxp-compliance-and-doc",
+    "name": "Change Control - Impact Review Required GxP Compliance & Doc",
+    "file": "templates/Change Control - Impact Review Required GxP Compliance & Doc.html"
+  },
+  {
+    "id": "change-control-impact-review-required-quality-and-patient-safety",
+    "name": "Change Control - Impact Review Required Quality & Patient Safety",
+    "file": "templates/Change Control - Impact Review Required Quality & Patient Safety.html"
+  },
+  {
+    "id": "change-control-impact-review-required-reg",
+    "name": "Change Control - Impact Review Required Reg",
+    "file": "templates/Change Control - Impact Review Required Reg.html"
+  },
+  {
+    "id": "change-control-impact-review-required-supply",
+    "name": "Change Control - Impact Review Required Supply",
+    "file": "templates/Change Control - Impact Review Required Supply.html"
+  },
+  {
+    "id": "change-control-approved-to-proceed",
+    "name": "Change Control approved to proceed",
+    "file": "templates/Change Control approved to proceed.html"
+  },
+  {
+    "id": "change-control-returned-for-rework",
+    "name": "Change Control returned for rework",
+    "file": "templates/Change Control returned for rework.html"
+  },
+  {
+    "id": "delegate-email",
+    "name": "delegate-email",
+    "file": "templates/delegate-email.html"
+  },
+  {
+    "id": "diarize-email",
+    "name": "diarize-email",
+    "file": "templates/diarize-email.html"
+  },
+  {
+    "id": "email-req-after-submitting-proposed-change",
+    "name": "Email Req after submitting Proposed Change",
+    "file": "templates/Email Req after submitting Proposed Change.html"
+  },
+  {
+    "id": "pass-back-email",
+    "name": "pass-back-email",
+    "file": "templates/pass-back-email.html"
+  },
+  {
+    "id": "reject-email",
+    "name": "reject-email",
+    "file": "templates/reject-email.html"
+  },
+  {
+    "id": "risk-assessment-major",
+    "name": "Risk Assessment MAJOR",
+    "file": "templates/Risk Assessment MAJOR.html"
+  },
+  {
+    "id": "risk-assessment-minor",
+    "name": "Risk Assessment MINOR",
+    "file": "templates/Risk Assessment MINOR.html"
   }
 ]

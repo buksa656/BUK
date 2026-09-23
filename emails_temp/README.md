@@ -1,8 +1,8 @@
-# FlowForma Email Template Editor V3
+# FlowForma Email Template Editor V3.1
 
 A static, client-side editor for FlowForma HTML email templates. Designed to run on GitHub Pages or any static web server.
 
-## V3 changes
+## V3.1 changes
 
 - No PHP and no server-side API.
 - Works as a fully static GitHub Pages site.
@@ -15,6 +15,7 @@ A static, client-side editor for FlowForma HTML email templates. Designed to run
 - Basic formatting toolbar, links, undo/redo.
 - FlowForma `fftoken` elements are protected in the visual editor.
 - Token insertion clones a valid token already present in the current template rather than inventing token markup.
+- Includes all 22 HTML templates supplied in the V3.0 package.
 
 ## GitHub Pages setup
 
