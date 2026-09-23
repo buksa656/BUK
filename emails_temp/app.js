@@ -1,34 +1,7 @@
 const $ = id => document.getElementById(id);
 const canvas = $("canvas"), source = $("source"), select = $("templateSelect");
-let templates = [], current = null, iframe = null, syncing = false, history = [], future = [];
+let templates = [], current = null, iframe = null, syncing = false, history = [], future = [], originalHTML = "";
 let deviceWidth = 700;
-
-const TOKEN_DEFS = {
-  formlink: {
-    label: "FormLink",
-    html: "[FormLink]"
-  },
-  "change-control": {
-    label: "Change Control",
-    html: `<img class="fftoken" data-text="Unique Change Control number" data-value="{'StepCode':'PreA QA','QuestionCode':'PreA.1a-Q4','Type':'question','SubQuestionCode':null,'StepId':33,'QuestionId':149}" src="data:image/png;base64,REPLACE_WITH_EXISTING_TOKEN_IMAGE" style="height:1em;border:1px solid black;vertical-align:middle;" />`
-  },
-  "change-title": {
-    label: "Change Title",
-    html: `<img class="fftoken" data-text="Change Title" data-value="{'StepCode':'PreA','QuestionCode':'PreA.GTUyWCuLg3','Type':'question','SubQuestionCode':null,'StepId':28,'QuestionId':139}" src="data:image/png;base64,REPLACE_WITH_EXISTING_TOKEN_IMAGE" style="height:1em;border:1px solid black;vertical-align:middle;" />`
-  },
-  requester: {
-    label: "Requester",
-    html: `<img class="fftoken" data-text="Change Requester" data-value="{'StepCode':'PreA','QuestionCode':'PreA.ptqGWau51U','Type':'question','SubQuestionCode':null,'StepId':28,'QuestionId':140}" src="data:image/png;base64,REPLACE_WITH_EXISTING_TOKEN_IMAGE" style="height:1em;border:1px solid black;vertical-align:middle;" />`
-  },
-  "step-title": {
-    label: "Step Title",
-    html: `<img class="fftoken" data-text="Step Title" data-value="{StepTitle}" src="data:image/png;base64,REPLACE_WITH_EXISTING_TOKEN_IMAGE" style="height:1em;border:1px solid black;vertical-align:middle;" />`
-  },
-  "step-assigned": {
-    label: "Step Assigned To",
-    html: `<img class="fftoken" data-text="Step Assigned To" data-value="{StepAssignedTo}" src="data:image/png;base64,REPLACE_WITH_EXISTING_TOKEN_IMAGE" style="height:1em;border:1px solid black;vertical-align:middle;" />`
-  }
-};
 
 async function getJSON(url){
   const r=await fetch(url,{cache:"no-store"});
@@ -41,6 +14,7 @@ async function getText(url){
   return r.text();
 }
 function state(t){$("saveState").textContent=t}
+function stateText(){return $("saveState").textContent}
 function currentHTML(){return source.value}
 function setSource(html){source.value=html}
 function cleanForEditor(doc){
@@ -126,7 +100,10 @@ async function loadTemplate(id){
   current=t;
   const html=await getText(t.file);
   history=[html]; future=[];
-  setSource(html); render(html); state("Loaded");
+  originalHTML=html;
+  setSource(html); render(html);
+  loadDraftIfAvailable();
+  if(stateText()==="Ready") state("Loaded");
 }
 function populate(){
   select.innerHTML="";
@@ -135,25 +112,51 @@ function populate(){
   });
   if(templates[0]){select.value=templates[0].id;loadTemplate(select.value).catch(e=>state("Load failed: "+e.message))}
 }
-async function saveToNAS(){
-  const html=currentHTML();
+function draftKey(){ return `ff-email-editor:draft:${current?.id || "unknown"}`; }
+function saveDraft(){
+  if(!current) return;
   try{
-    state("Saving…");
-    const r=await fetch("api.php?action=save",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({id:current.id,html})
-    });
-    const data=await r.json();
-    if(!r.ok || !data.ok) throw new Error(data.error||"Save failed");
-    state("Saved to NAS");
-    history=[html];future=[];
+    localStorage.setItem(draftKey(), currentHTML());
+    state("Draft saved locally");
+    history=[currentHTML()]; future=[];
   }catch(e){
-    state("Save unavailable");
-    alert("The editor could not save to the NAS.\n\n"+e.message+"\n\nMake sure PHP is enabled for this Web Station site and api.php is available.");
+    state("Draft save failed");
+    alert("The browser could not save this draft locally.\n\n"+e.message);
   }
 }
-$("saveBtn").onclick=saveToNAS;
-$("copyBtn").onclick=async()=>{await navigator.clipboard.writeText(currentHTML());state("HTML copied")};
+function clearDraft(){
+  if(!current) return;
+  try{ localStorage.removeItem(draftKey()); }catch(e){}
+}
+function resetTemplate(){
+  if(!current || !originalHTML) return;
+  if(!confirm("Reset this template to the original file and discard the current browser draft?")) return;
+  clearDraft();
+  history=[originalHTML]; future=[];
+  setSource(originalHTML); render(originalHTML); state("Reset to original");
+}
+function loadDraftIfAvailable(){
+  if(!current) return false;
+  try{
+    const draft=localStorage.getItem(draftKey());
+    if(!draft || draft===originalHTML) return false;
+    if(confirm("A saved browser draft exists for this template. Restore it?")){
+      history=[draft]; future=[]; setSource(draft); render(draft); state("Draft restored"); return true;
+    }
+  }catch(e){}
+  return false;
+}
+$("saveBtn").onclick=saveDraft;
+$("resetBtn").onclick=resetTemplate;
+$("copyBtn").onclick=async()=>{
+  try{
+    await navigator.clipboard.writeText(currentHTML());
+    state("HTML copied");
+  }catch(e){
+    const ta=document.createElement("textarea"); ta.value=currentHTML(); document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy"); ta.remove(); state("HTML copied");
+  }
+};
 $("downloadBtn").onclick=()=>{
   const b=new Blob([currentHTML()],{type:"text/html;charset=utf-8"});
   const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=(current?.id||"template")+".html";a.click();
